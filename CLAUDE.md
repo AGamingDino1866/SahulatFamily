@@ -53,11 +53,12 @@ Violating this breaks the deployment CI/CD pipeline.
   - updated_at: ISO8601 date string (YYYY-MM-DD, Asia/Karachi TZ)
 
 /application_submissions/{uid}
-  - uid: string (Firebase UID, PK)
-  - email: string (denormalized from auth token)
-  - application_id: string (most recent submission for this UID)
-  - updated_at: timestamp (serverTimestamp)
-  [Used for duplicate detection on client + server]
+  [Reserved/unused - not currently read or written by any code. Actual duplicate
+   detection is a localStorage marker (`sahulat-submitted:{uid}`) on apply.html,
+   verified against the real /applications/{id} doc via getDoc() on page load so
+   a deleted application doesn't leave a false "already submitted" state - but the
+   marker itself is still per-browser, not per-account, until this collection (or
+   equivalent) is actually wired up server-side.]
 
 /ai_usage/{date-ip}
   - date: YYYY-MM-DD (Asia/Karachi TZ, computed on request, indexed)
@@ -323,10 +324,12 @@ x-firebase-token: <JWT from Firebase Auth>   (optional - unlocks unlimited daily
 ## Admin Dashboard
 
 **Overview:**
+- Stats bar at the top of the dashboard: total + a count per status (Received, Under Review, Needs Info, Approved, Rejected), each with a color-coded dot matching that status's pill color
 - Compact application list with expandable cards
 - Click header to expand/collapse full details
-- Search by student name or application ID
-- Filter by status (Received, Under Review, Needs Info, Approved, Rejected)
+- Search by student name, application ID, email, or phone number
+- Filter by status
+- Status pills are color-coded per status (navy/amber/pink/green/red) for fast visual scanning, instead of a single uniform pill style
 
 **Expandable Card Layout:**
 ```
@@ -334,8 +337,16 @@ x-firebase-token: <JWT from Firebase Auth>   (optional - unlocks unlimited daily
 │                                   │ ← Click to expand
 ├─────────────────────────────────┤
 │ Application Info                │
-│ - ID, Email, City, Grade,       │
-│   School, Submitted Date        │
+│ - ID, Email, Phone,             │
+│   Preferred Contact, City,      │
+│   Grade, School, Submitted Date │
+│                                   │
+│ Family & Background             │
+│ - Mother's Name, Father's       │
+│   Employment, Siblings,         │
+│   Family Has University Degree, │
+│   Disability/Chronic Health,    │
+│   Internet Access at Home       │
 │                                   │
 │ Financial Need                  │
 │ [scrollable text box]           │
@@ -361,10 +372,12 @@ x-firebase-token: <JWT from Firebase Auth>   (optional - unlocks unlimited daily
 - **Message Customization:** Edit what student sees in status lookup
 - **Admin Notes:** Internal comments (not visible to student)
 - **Status Updates:** Change status with immediate Firestore sync
-- **Download:** Export application as .txt file
+- **Download:** Export application as .txt file (includes every field, including Family & Background)
 - **Delete:** Remove application (with confirmation)
-- **Bulk Export:** CSV export of visible applications
+- **Bulk Export:** CSV export of visible applications (includes every field, including Family & Background)
 - **Refresh:** Reload from Firestore
+
+**Note:** the Family & Background fields (siblings count, father's employment, family degree, disability, internet access) map directly to the eligibility scoring criteria described on `eligibility.html` (family size 15%, guardian work 10%, etc) - they were previously stored in Firestore but not shown anywhere in the admin UI, making it impossible to actually review an application against the documented criteria. Fixed as part of the admin dashboard revamp.
 
 ## Local Development
 
@@ -538,6 +551,7 @@ Edit `eligibility.html` directly (static content, no code changes needed):
 1. **In-memory rate limiting** - Resets on function cold start (~hourly), users can exceed 150/day
 2. **No uniqueness constraint on application IDs** - Collisions (~1/1.6M) overwrite previous submission
 3. **Firebase config in HTML** - API key visible in source (not a secret, scoped to Firestore)
-5. **Eventual consistency** - Status updates may lag behind application writes (~few seconds)
-6. **No offline support** - Requires active internet connection for Firestore operations
-7. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness
+4. **Eventual consistency** - Status updates may lag behind application writes (~few seconds)
+5. **No offline support** - Requires active internet connection for Firestore operations
+6. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness
+7. **Duplicate-submission marker is per-browser, not per-account** - apply.html verifies its localStorage "already submitted" marker against Firestore on load (so a deleted application no longer falsely blocks resubmission), but a student who switches browsers/devices won't carry that marker over, since `/application_submissions` (documented above) isn't actually wired up server-side
