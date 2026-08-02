@@ -1,8 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { getFirestore, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
 
-const firebaseConfig = {apiKey:"AIzaSyAw65XzclDbj2AUyHKlPKP0dufaoqpd8OY",authDomain:"successscholarships-2026.firebaseapp.com",projectId:"successscholarships-2026",storageBucket:"successscholarships-2026.firebasestorage.app",messagingSenderId:"548307406445",appId:"1:548307406445:web:821b1aa139ecdb0ac2f964",measurementId:"G-7X02YSZCZ0"};
+
 const adminEmail="sahulatfamilypk@gmail.com";
 const app=initializeApp(firebaseConfig,"sahulat-family-admin");
 const auth=getAuth(app);

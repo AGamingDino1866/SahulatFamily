@@ -84,10 +84,9 @@ Violating this breaks the deployment CI/CD pipeline.
 | `/contact.html` | `contact.html` | None | Support info, email links |
 | `/admin.html` | `admin.html` | Firebase Auth (admin email) | Admin dashboard (full Firestore CRUD) |
 
-**Firebase Config** (hardcoded in HTML - keep private):
-- Located in `<script type="module">` tags
-- Files: `apply.html`, `status.html`, `admin.html`, `auth.html`
-- Do NOT commit to git; update in Firebase Console only
+**Firebase Config** (hardcoded, not a secret - scoped to Firestore rules):
+- Centralized in `assets/js/firebase-config.js`, imported by every page-specific module (`apply.js`, `status.js`, `admin.js`, `auth.js`, `ask-ai.js`, `test.js`) - update the project config in one place
+- Update in Firebase Console if the project changes, then update `firebase-config.js` to match
 
 **Authorized Domains** (Firebase Console → Auth → Settings):
 ```
@@ -550,7 +549,7 @@ Edit `eligibility.html` directly (static content, no code changes needed):
 
 1. **In-memory rate limiting** - Resets on function cold start (~hourly), users can exceed 150/day
 2. **No uniqueness constraint on application IDs** - Collisions (~1/1.6M) overwrite previous submission
-3. **Firebase config in HTML** - API key visible in source (not a secret, scoped to Firestore)
+3. **Firebase config in client-side JS** - API key visible in source (not a secret, scoped to Firestore rules)
 4. **Eventual consistency** - Status updates may lag behind application writes (~few seconds)
 5. **No offline support** - Requires active internet connection for Firestore operations
 6. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness

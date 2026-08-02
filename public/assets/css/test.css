@@ -1,0 +1,127 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Monaco', 'Courier New', monospace;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 20px;
+      border-bottom: 2px solid #2c2c85;
+      padding-bottom: 15px;
+    }
+    h1 {
+      color: #2c2c85;
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #2c2c85;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    button:hover { background: #4545a3; }
+    button.danger { background: #e74c3c; }
+    button.danger:hover { background: #c0392b; }
+    .console {
+      background: #2d2d30;
+      border: 1px solid #3e3e42;
+      border-radius: 6px;
+      padding: 15px;
+      height: 500px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .console-line {
+      margin: 3px 0;
+      padding: 2px 5px;
+    }
+    .log { color: #d4d4d4; }
+    .pass { color: #4ec9b0; }
+    .fail { color: #f48771; }
+    .warn { color: #dcdcaa; }
+    .info { color: #9cdcfe; }
+    .test-name { color: #ce9178; font-weight: bold; }
+    .time { color: #858585; }
+    .sidebar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .test-group {
+      background: #252526;
+      border: 1px solid #3e3e42;
+      border-radius: 6px;
+      padding: 15px;
+    }
+    .test-group h3 {
+      color: #2c2c85;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .test-item {
+      padding: 8px 10px;
+      margin: 5px 0;
+      background: #1e1e1e;
+      border-left: 3px solid #444;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 0.85rem;
+    }
+    .test-item:hover {
+      background: #2d2d30;
+      border-left-color: #2c2c85;
+    }
+    .test-item.active {
+      background: #2c2c85;
+      border-left-color: #4ec9b0;
+      color: white;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: #252526;
+      border: 1px solid #3e3e42;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2c2c85;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: #858585;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+    .stat-box.pass { color: #4ec9b0; }
+    .stat-box.fail { color: #f48771; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1e1e1e; }
+    ::-webkit-scrollbar-thumb { background: #3e3e42; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4e4e50; }
