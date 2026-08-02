@@ -6,7 +6,8 @@ A website where students in Pakistan apply for need-based education scholarships
 
 ## What this project does
 
-- **Students** sign in with Google, fill out a 15-question application (financial need, school, family background), and submit it
+- **Students** sign in with Google, fill out a 16-question application (financial need, school, family background), and submit it
+- **The homepage** lists Pakistani universities and colleges, searchable and filterable by city (Karachi, Lahore, Islamabad, or Other)
 - **An AI assistant** ("Sahulat AI") answers questions about eligibility and helps students write clearer, honest answers
 - **A public status page** lets anyone look up an application's review status by ID, without needing to sign in
 - **An admin dashboard** (hidden from public navigation) lets the scholarship team review every application's full details, update its status, leave notes, and export data
@@ -49,7 +50,7 @@ Every HTML page follows the same pattern: `assets/css/styles.css` (shared theme)
 ```
 public/
 ├── index.html              # Homepage + mission + stats + HowItWorks flow
-├── apply.html              # Step-by-step questionnaire (15 questions), Firebase writes, duplicate check, read-aloud buttons
+├── apply.html              # Step-by-step questionnaire (16 questions), Firebase writes, duplicate check, read-aloud buttons
 ├── eligibility.html        # Criteria breakdown (40% income, 15% family size, etc)
 ├── ask-ai.html             # Chat UI, Groq integration, rate limit display, read-aloud button
 ├── status.html             # Public status lookup, printable receipt, read-aloud button
@@ -74,7 +75,8 @@ public/
 │   │   ├── script.js       # Shared: nav setup, mobile menu, navy theme injection, SW registration - loaded on every page
 │   │   ├── firebase-config.js # Shared Firebase project config, imported by every page below - change the project in one place
 │   │   ├── admin.js        # admin.html: Firestore CRUD for applications, status updates, CSV export
-│   │   ├── apply.js        # apply.html: 15-question form logic, validation, submission
+│   │   ├── apply.js        # apply.html: 16-question form logic, validation, submission
+│   │   ├── index.js        # index.html: university/college search + city filter
 │   │   ├── ask-ai.js       # ask-ai.html: chat UI + Groq calls
 │   │   ├── auth.js         # auth.html: Google sign-in popup
 │   │   ├── status.js       # status.html: status lookup logic
@@ -92,15 +94,15 @@ public/
 
 ## Application Form Features
 
-**Step-by-Step Questionnaire (15 Questions)**
+**Step-by-Step Questionnaire (16 Questions)**
 - One question per screen for better UX
-- Progress bar showing "Question X of 15"
+- Progress bar showing "Question X of 16"
 - Auto-save to localStorage with draft recovery
 - Duplicate application detection: verified against Firestore (not just local state), so a deleted application doesn't falsely block resubmission
-- Per-field validation beyond required/empty checks (sibling count range, phone number format, school name plausibility)
+- Per-field validation beyond required/empty checks (CNIC/B-Form 13-digit format, sibling count range, phone number format, school name plausibility)
 
 **Question Types:**
-- Text inputs (name, school, phone)
+- Text inputs (name, CNIC/B-Form, school, phone)
 - Number inputs (sibling count)
 - Select dropdowns (city, grade, employment status, contact preference)
 - Radio buttons (yes/no questions)

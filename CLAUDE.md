@@ -30,6 +30,7 @@ Violating this breaks the deployment CI/CD pipeline.
 ```firestore
 /applications/{application_id}
   - student_name: string
+  - cnic_number: string (13 digits, dashes optional)
   - email: string (indexed)
   - uid: string (Firebase UID, indexed)
   - grade: string
@@ -94,32 +95,33 @@ sahulatafamilytrust.pages.dev
 *.sahulatafamilytrust.pages.dev
 ```
 
-### Application Form (14-Question Questionnaire)
+### Application Form (16-Question Questionnaire)
 
 **Structure:**
 - One question per screen for progressive disclosure
-- Progress bar shows "Question X of 15"
+- Progress bar shows "Question X of 16"
 - Back/Next buttons for navigation
 - Auto-save to localStorage with draft recovery
 - Duplicate detection via `sahulat-submitted:{uid}` marker
-- Per-field validation beyond required/empty checks (`fieldValidators` in apply.html): sibling count must be an integer 0-20, school name must be 3-100 chars and contain a letter, phone number (if provided) must match a Pakistani mobile pattern. This blocks obviously-fake input (e.g. "1200" siblings, a phone number that's just repeated digits) but cannot verify real-world truth (e.g. that a named school genuinely exists) - that still relies on the admin's manual review in the admin dashboard.
+- Per-field validation beyond required/empty checks (`fieldValidators` in apply.js): CNIC/B-Form must be exactly 13 digits (dashes optional), sibling count must be an integer 0-20, school name must be 3-100 chars and contain a letter, phone number (if provided) must match a Pakistani mobile pattern. This blocks obviously-fake input (e.g. "1200" siblings, a phone number that's just repeated digits) but cannot verify real-world truth (e.g. that a named school genuinely exists) - that still relies on the admin's manual review in the admin dashboard.
 
 **Questions (in order):**
 1. Full name (text)
-2. City (select: Karachi, Lahore, Islamabad, Rawalpindi, Other)
-3. Grade/Year (select: Class 9-10, Matric, O/A Level, Intermediate/FSc Part 1-2, BA/BSc Year 1-4, MA/MSc Year 1-2, Other) - a fixed dropdown rather than free text, so it can't be filled with nonsensical values; starts at Class 9 since younger students aren't the target for this need-based, career-oriented scholarship
-4. School/College name (text, 3-100 chars, must contain a letter)
-5. Mother's name (optional text)
-6. Father's employment status (select)
-7. Number of siblings (number, validated 0-20)
-8. Family has university degree? (radio: Yes/No)
-9. Has disability or chronic health? (radio: Yes/No)
-10. Reliable internet access? (select: Yes/reliable, Sometimes unreliable, No access - "No access" is intentionally kept: many applicants qualify for need-based aid precisely because they lack home internet and are applying from a library/school/borrowed device)
-11. Financial need (textarea, 0-1000 chars)
-12. Career goals (textarea, 0-1000 chars)
-13. Why deserve scholarship? (textarea, 0-800 chars)
-14. Phone number (optional text, validated against a Pakistani mobile number pattern if provided)
-15. Preferred contact method (select: WhatsApp, Email, Phone, SMS)
+2. CNIC or B-Form number (text, must be exactly 13 digits, dashes optional, e.g. `12345-1234567-1`)
+3. City (select: Karachi, Lahore, Islamabad, Rawalpindi, Other)
+4. Grade/Year (select: Class 9-10, Matric, O/A Level, Intermediate/FSc Part 1-2, BA/BSc Year 1-4, MA/MSc Year 1-2, Other) - a fixed dropdown rather than free text, so it can't be filled with nonsensical values; starts at Class 9 since younger students aren't the target for this need-based, career-oriented scholarship
+5. School/College name (text, 3-100 chars, must contain a letter)
+6. Mother's name (optional text)
+7. Father's employment status (select)
+8. Number of siblings (number, validated 0-20)
+9. Family has university degree? (radio: Yes/No)
+10. Has disability or chronic health? (radio: Yes/No)
+11. Reliable internet access? (select: Yes/reliable, Sometimes unreliable, No access - "No access" is intentionally kept: many applicants qualify for need-based aid precisely because they lack home internet and are applying from a library/school/borrowed device)
+12. Financial need (textarea, 0-1000 chars)
+13. Career goals (textarea, 0-1000 chars)
+14. Why deserve scholarship? (textarea, 0-800 chars)
+15. Phone number (optional text, validated against a Pakistani mobile number pattern if provided)
+16. Preferred contact method (select: WhatsApp, Email, Phone, SMS)
 
 **Accessibility Features:**
 - Proper semantic HTML with `<fieldset>`, `<legend>`, `<label for="id">`
