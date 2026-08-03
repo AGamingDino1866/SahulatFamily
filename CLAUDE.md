@@ -30,7 +30,7 @@ Violating this breaks the deployment CI/CD pipeline.
 ```firestore
 /applications/{application_id}
   - student_name: string
-  - cnic_number: string (13 digits, dashes optional)
+  - cnic_encrypted: string (base64 RSA-OAEP ciphertext of the 13-digit CNIC/B-Form number - see "CNIC Encryption" below. Applications submitted before this field existed instead have a plaintext `cnic_number` field; admin.js reads either)
   - email: string (indexed)
   - uid: string (Firebase UID, indexed)
   - grade: string
@@ -71,6 +71,19 @@ Violating this breaks the deployment CI/CD pipeline.
 **Composite Key Pattern:**
 - `/ai_usage/{YYYY-MM-DD}:{ip}` e.g. `2026-07-20:203.0.113.1`
 - Automatic TTL deletion (24h after creation) via Firestore TTL policy
+
+### CNIC Encryption
+
+CNIC/B-Form numbers are Pakistani national ID numbers - sensitive PII - so they're encrypted client-side before ever reaching Firestore, using asymmetric (public-key) encryption rather than a shared secret, since apply.html writes to Firestore directly from the browser with no server in that path:
+
+- **Scheme:** RSA-OAEP-256, 2048-bit key, via the browser's native Web Crypto API (`crypto.subtle`).
+- **Public key:** embedded in `assets/js/cnic-crypto.js` (`CNIC_PUBLIC_KEY_JWK`). A public key is not a secret - safe to ship to every visitor. `apply.js` calls `encryptCnic()` from this module right before building the Firestore payload, storing the result as `cnic_encrypted` (plaintext `cnic_number` is never written to Firestore for new submissions).
+- **Private key:** stored only as the `CNIC_PRIVATE_KEY` Cloudflare Pages environment secret (a JWK JSON string) - never present in any file in this repo, never sent to the browser. Generated once with Node's `crypto.webcrypto.subtle.generateKey({name:"RSA-OAEP",modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:"SHA-256"},true,["encrypt","decrypt"])`, then exported as JWK. If it's ever lost, all previously-encrypted CNIC values become unrecoverable - back it up somewhere safe outside git (a password manager, not a file in this repo).
+- **Decryption points** (both server-side, both in `functions/_lib/cnic-crypto.js`, imported by the two functions below):
+  - `POST /api/decrypt-cnic` - called from `admin.js` when an admin clicks "Show CNIC" on a specific application, downloads a CSV, or downloads a single application's .txt file. Decrypts on demand rather than in bulk on page load, so plaintext CNIC only ever exists in memory for the moment it's actually needed.
+  - `functions/api/send-confirmation.js` - decrypts `cnic_encrypted` server-side (if present) before forwarding the payload to the Google Apps Script email handler, so the admin notification email can include the real number without the ciphertext ever needing client-side decryption.
+- **Admin auth for decryption:** unlike `ask-ai.js`/`tts.js` (which only base64-decode the JWT payload without checking its signature - fine for a low-stakes rate-limit bypass), `/api/decrypt-cnic` performs full Firebase ID token verification (RS256 signature check against Google's published JWKS, plus `aud`/`iss`/`exp` checks) before decrypting anything, since a forged/unsigned token here would mean anyone could read any student's national ID number. See `verifyAdminToken()` in `functions/_lib/cnic-crypto.js`.
+- **Known gap:** applications submitted before this feature shipped still have their CNIC in the old plaintext `cnic_number` field - there's no migration tool in this repo to re-encrypt them (the private key alone isn't enough; that would need a script with Firestore write access run outside this session). `admin.js` displays those directly (no decrypt needed) via `getCnicValue()`, which checks `cnic_number` before falling back to a decrypted `cnic_encrypted`.
 
 ### Routes & Auth
 
@@ -321,6 +334,35 @@ x-firebase-token: <JWT from Firebase Auth>   (optional - unlocks unlimited daily
 - Copy deployment URL to `functions/api/send-confirmation.js` line 1
 - Create Gmail trigger manually: Function: `handleIncomingEmail`, Event: "On receive"
 - Both functions handle errors gracefully (don't crash)
+- If `cnic_encrypted` is present in the payload, this function decrypts it server-side (see "CNIC Encryption" above) before forwarding to Apps Script, replacing it with plaintext `cnic_number` - so the admin email can show the real number without any client ever decrypting it
+
+### POST `/api/decrypt-cnic`
+
+**Purpose:** Lets the admin dashboard reveal a specific application's CNIC/B-Form number on demand, without ever shipping the decryption key to the browser. See "CNIC Encryption" above for the full scheme.
+
+**Headers:**
+```
+Content-Type: application/json
+x-firebase-token: <JWT from Firebase Auth>   (required - verified server-side, not just decoded)
+```
+
+**Request:**
+```json
+{ "items": [{ "application_id": "SF2026-ABC12", "cnic_encrypted": "base64..." }] }
+```
+(up to 500 items per call - `admin.js` batches all visible rows in one call for CSV export, or a single item for the per-row "Show CNIC" button / single-application download)
+
+**Response (200):**
+```json
+{ "ok": true, "items": [{ "application_id": "SF2026-ABC12", "ok": true, "cnic": "12345-1234567-1" }] }
+```
+
+**Errors:**
+- `401 Unauthorized`: missing/invalid/expired `x-firebase-token`, or the token's email isn't `sahulatfamilypk@gmail.com` / `admin-override@sahulatfamily.internal`
+- `400 Bad Request`: invalid JSON or empty `items`
+- `500 Internal Server Error`: `CNIC_PRIVATE_KEY` environment secret not configured
+
+**Config:** requires the `CNIC_PRIVATE_KEY` Cloudflare Pages environment secret (see "CNIC Encryption" above).
 
 ## Progressive Web App
 
@@ -351,9 +393,12 @@ x-firebase-token: <JWT from Firebase Auth>   (optional - unlocks unlimited daily
 │                                   │ ← Click to expand
 ├─────────────────────────────────┤
 │ Application Info                │
-│ - ID, Email, Phone,             │
-│   Preferred Contact, City,      │
-│   Grade, School, Submitted Date │
+│ - ID, CNIC/B-Form (hidden       │
+│   behind a "Show CNIC" button   │
+│   until decrypted), Email,      │
+│   Phone, Preferred Contact,     │
+│   City, Grade, School,          │
+│   Submitted Date                │
 │                                   │
 │ Family & Background             │
 │ - Mother's Name, Father's       │
@@ -559,6 +604,7 @@ Edit `eligibility.html` directly (static content, no code changes needed):
 | `/api/ask-ai` | POST | Required (JWT) | 150/day per IP | Groq LLM chat |
 | `/api/tts` | POST | None (JWT unlocks unlimited for admin) | 20,000 chars/day per IP | Workers AI read-aloud |
 | `/api/send-confirmation` | POST | Internal | None | Email handler |
+| `/api/decrypt-cnic` | POST | Required (JWT, signature-verified, admin only) | 500 items/call | Decrypts a CNIC/B-Form number for admin display/export |
 
 ## Known Limitations
 
@@ -569,3 +615,5 @@ Edit `eligibility.html` directly (static content, no code changes needed):
 5. **No offline support** - Requires active internet connection for Firestore operations
 6. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness
 7. **Duplicate-submission marker is per-browser, not per-account** - apply.html verifies its localStorage "already submitted" marker against Firestore on load (so a deleted application no longer falsely blocks resubmission), but a student who switches browsers/devices won't carry that marker over, since `/application_submissions` (documented above) isn't actually wired up server-side
+8. **Pre-existing applications have a plaintext CNIC** - only applications submitted after the CNIC encryption feature shipped get `cnic_encrypted`; older applications keep their original plaintext `cnic_number` field since there's no migration tool wired up to re-encrypt them
+9. **CNIC private key loss is unrecoverable** - if the `CNIC_PRIVATE_KEY` Cloudflare secret is ever lost without a backup, every previously-encrypted CNIC becomes permanently undecryptable (there's no key-rotation/re-encryption tooling in this repo)

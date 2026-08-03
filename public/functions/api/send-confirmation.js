@@ -1,3 +1,5 @@
+import { decryptCnic } from "../_lib/cnic-crypto.js";
+
 const emailScriptUrl = "https://script.google.com/macros/s/AKfycbw_h2c0Yc5MXJ4psqJPHRouBkbSYArRRVZwnk2f0QbRB1jrZCYNLRVNOCEsNN4C4W6D/exec";
 
 const json = (body, status = 200) =>
@@ -28,6 +30,15 @@ export async function onRequestPost(context) {
 
   if (!payload.email || !payload.application_id) {
     return json({ ok: false, error: "Missing applicant email or application ID." }, 400);
+  }
+
+  if (payload.cnic_encrypted) {
+    try {
+      payload.cnic_number = await decryptCnic(context.env, payload.cnic_encrypted);
+    } catch (error) {
+      console.error("CNIC decrypt error:", error.message);
+    }
+    delete payload.cnic_encrypted;
   }
 
   try {

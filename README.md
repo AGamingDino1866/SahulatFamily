@@ -76,6 +76,7 @@ public/
 │   │   ├── firebase-config.js # Shared Firebase project config, imported by every page below - change the project in one place
 │   │   ├── admin.js        # admin.html: Firestore CRUD for applications, status updates, CSV export
 │   │   ├── apply.js        # apply.html: 16-question form logic, validation, submission
+│   │   ├── cnic-crypto.js  # Shared: RSA-OAEP public key + browser-side CNIC encryption, used by apply.js
 │   │   ├── index.js        # index.html: university/college search + city filter
 │   │   ├── ask-ai.js       # ask-ai.html: chat UI + Groq calls
 │   │   ├── auth.js         # auth.html: Google sign-in popup
@@ -85,9 +86,12 @@ public/
 │   │   └── ui.js           # Unused stub (dark mode removed)
 ├── functions/
 │   ├── _middleware.js      # Pages Functions middleware (pass-through)
+│   ├── _lib/
+│   │   └── cnic-crypto.js  # Server-only: decrypts CNIC with the private key (Cloudflare secret), verifies Firebase ID tokens
 │   └── api/
 │       ├── ask-ai.js       # Groq API wrapper, rate limiting (150/day per IP)
 │       ├── tts.js          # Cloudflare Workers AI text-to-speech proxy
+│       ├── decrypt-cnic.js # Decrypts a CNIC/B-Form number for the admin dashboard (auth-gated)
 │       └── send-confirmation.js # Student confirmation + admin notification emails via Google Apps Script
 └── CLAUDE.md               # Implementation reference (repo root)
 ```
@@ -154,7 +158,7 @@ Hidden from public navigation, restricted to the scholarship team's Google accou
 - Compact list view with expandable cards, color-coded status pills
 - Search by student name, application ID, email, or phone number
 - Filter by application status
-- Full detail view per application: contact info, **Family & Background** (mother's name, father's employment, siblings, family degree, disability, internet access - the fields the eligibility criteria are actually scored on), financial need, career goals, character statement
+- Full detail view per application: contact info, CNIC/B-Form number (encrypted at rest, decrypted on demand behind a "Show CNIC" button - see CLAUDE.md), **Family & Background** (mother's name, father's employment, siblings, family degree, disability, internet access - the fields the eligibility criteria are actually scored on), financial need, career goals, character statement
 
 **Status Updates:**
 - Customize message shown to student
