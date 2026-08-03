@@ -160,11 +160,24 @@ sahulatafamilytrust.pages.dev
 
 Admin email: `sahulatfamilypk@gmail.com`
 
+**Admin override login:** `admin.html` has a small "Trouble signing in?" link below the Google button that reveals a password field. Submitting it signs in via Firebase Auth's Email/Password provider against a second admin account, email `admin-override@sahulatfamily.internal` (placeholder - swap for any email you control, it doesn't need to be a real inbox). This is a real Firebase Auth session, not a client-side gate, so Firestore rules must grant it the same access as the Google admin account (see `isAdmin()` below). Requires one-time Firebase Console setup:
+1. Authentication → Sign-in method → enable **Email/Password** provider
+2. Authentication → Users → Add user → email `admin-override@sahulatfamily.internal`, choose a strong password
+Both `admin.js`'s `adminEmails` array and the Firestore `isAdmin()` rule must list this email alongside the Google admin email - update both together if it ever changes.
+
 Security rules configured in Firebase Console (not versioned in git). Key constraints:
-- Admin email: full read/write on all collections
+- Admin email (either `sahulatfamilypk@gmail.com` or the override email above, via `isAdmin()`): full read/write on all collections
 - Users: create-only on `/applications` (cannot read others' apps)
 - `/application_status`: public read (no auth required)
 - `/application_submissions`: write-only during app submission (dedup check)
+
+```
+function isAdmin() {
+  return request.auth != null
+    && (request.auth.token.email == "sahulatfamilypk@gmail.com"
+        || request.auth.token.email == "admin-override@sahulatfamily.internal");
+}
+```
 
 **Note:** apply.html's `fieldValidators` (sibling count range, phone number format, etc.) only run in the browser - a user who bypasses the UI and writes to the Firestore REST API directly skips them entirely. For validation that can't be bypassed, add matching `request.resource.data.*` constraints to the Firestore rules for `/applications` in Firebase Console, e.g. `request.resource.data.sibling_count is int && request.resource.data.sibling_count >= 0 && request.resource.data.sibling_count <= 20`.
 
