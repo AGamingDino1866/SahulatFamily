@@ -39,7 +39,7 @@ Technically: a JAMstack scholarship portal with a vanilla HTML/CSS/JS frontend, 
 **Cold starts:** Functions restart ~hourly (serverless), in-memory rate limit counters reset.
 
 **Caching strategy:**
-- Static assets: CF cache headers (default 30 days)
+- `_headers` (project root) sets `Cache-Control: no-cache` on every path, so browsers and Cloudflare's edge always revalidate with the origin before reusing a cached copy of any HTML/CSS/JS file - a deploy is picked up on the next load automatically, no hard refresh needed. Unchanged files still come back fast via a 304 response; there's no need to keep bumping the `?v=` query strings on `<script>`/`<link>` tags for correctness anymore (though it doesn't hurt to).
 - Firebase SDK: CDN-cached (gstatic.com)
 - Firestore docs: Client-side SDK cache + browser storage
 
@@ -64,6 +64,7 @@ public/
 ├── robots.txt              # Search engine crawl rules
 ├── sitemap.xml             # Search engine sitemap
 ├── _routes.json            # CF Pages Functions routing config (routes /api/* only)
+├── _headers                # Cache-Control: no-cache on every path, so deploys are always picked up without a hard refresh
 ├── favicon.svg
 ├── assets/
 │   ├── css/
