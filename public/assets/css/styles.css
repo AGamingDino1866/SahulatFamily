@@ -270,7 +270,7 @@ h1 {
   position: relative;
   background:
     linear-gradient(90deg, rgba(44, 44, 133, 0.18), rgba(44, 44, 133, 0.02)),
-    url("../education-hero.png") center / cover;
+    url("../img/education-hero.png") center / cover;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: var(--shadow);

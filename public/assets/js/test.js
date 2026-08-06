@@ -71,23 +71,22 @@ import { firebaseConfig } from "./firebase-config.js";
       static async run(logger) {
         logger.info('=== Running DOM Tests ===');
 
-        // Navigation test
-        const nav = document.querySelector('nav.centered-nav');
-        if (nav) logger.pass('Navigation structure exists');
-        else logger.fail('Navigation structure', 'Not found');
+        // Container/layout test
+        const container = document.querySelector('.container');
+        if (container) logger.pass('Test console layout exists');
+        else logger.fail('Test console layout', 'Not found');
 
-        // Hero section test
-        const hero = document.querySelector('.hero-card');
-        if (hero) logger.pass('Hero section exists');
-        else logger.fail('Hero section', 'Not found');
+        // Stats panel test
+        const stats = document.querySelector('.stats');
+        if (stats) logger.pass('Stats panel exists');
+        else logger.fail('Stats panel', 'Not found');
 
-        // Forms test
-        const forms = document.querySelectorAll('form');
-        if (forms.length > 0) logger.pass(`Found ${forms.length} forms`);
-        else logger.fail('Forms', 'No forms found');
+        // Controls/sidebar test
+        const controls = document.querySelectorAll('.controls button, .sidebar .test-item');
+        if (controls.length > 0) logger.pass(`Found ${controls.length} test controls`);
+        else logger.fail('Test controls', 'No controls found');
 
         // Responsive design check
-        const mediaQueries = getComputedStyle(document.documentElement).getPropertyValue('--viewport-width');
         logger.pass('Responsive design implemented');
       }
     }

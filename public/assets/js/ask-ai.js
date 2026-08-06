@@ -93,11 +93,11 @@ import { firebaseConfig } from "./firebase-config.js";
       };
 
       const refreshCounter = async (user) => {
-        if (!user) { setLeft(50); return; }
+        if (!user) { setLeft(150); return; }
         if (hasUnlimitedAi(user)) { setLeft(Infinity); return; }
         const snap = await getDoc(usageDoc(user));
         const count = snap.exists() ? Number(snap.data().count || 0) : 0;
-        setLeft(50 - count);
+        setLeft(150 - count);
       };
 
       const reserveDailyMessage = async (user) => {
@@ -106,10 +106,10 @@ import { firebaseConfig } from "./firebase-config.js";
           const ref = usageDoc(user);
           const snap = await transaction.get(ref);
           const count = snap.exists() ? Number(snap.data().count || 0) : 0;
-          if (count >= 50) throw new Error('You used all your questions for today. Come back tomorrow.');
+          if (count >= 150) throw new Error('You used all your questions for today. Come back tomorrow.');
           const nextCount = count + 1;
           transaction.set(ref, { uid: user.uid, email: user.email, date: todayKey(), count: nextCount, updated_at: serverTimestamp() }, { merge: true });
-          return 50 - nextCount;
+          return 150 - nextCount;
         });
       };
 
@@ -138,7 +138,7 @@ import { firebaseConfig } from "./firebase-config.js";
           await refreshCounter(user);
         } else {
           accountState.textContent = 'Sign in to use AI help.';
-          setLeft(50);
+          setLeft(150);
         }
       });
 

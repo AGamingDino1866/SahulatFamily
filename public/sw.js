@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahulat-family-v4";
+const CACHE_NAME = "sahulat-family-v5";
 
 const PRECACHE_URLS = [
   "/",

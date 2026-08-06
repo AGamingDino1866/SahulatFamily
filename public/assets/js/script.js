@@ -3,6 +3,7 @@ const applySahulatFamilyBranding = () => {
   const newEmail = "sahulatfamilypk@gmail.com";
   const replacements = [
     ["Success Factor", "Sahulat Family"],
+    ["Success Scholarship", "Sahulat Family"],
     ["Success Club", "Sahulat Family"],
     [oldEmail, newEmail]
   ];
@@ -168,7 +169,6 @@ const setupNavigation = () => {
   const toggleMenu = () => {
     const isOpen = document.body.classList.toggle("nav-open");
     navToggle.setAttribute("aria-expanded", String(isOpen));
-    console.log("Menu toggled:", isOpen);
   };
 
   navToggle.addEventListener("click", (e) => {

@@ -6,6 +6,7 @@ Allow: /
 # Disallow private/admin sections
 Disallow: /admin.html
 Disallow: /admin/
+Disallow: /test.html
 Disallow: /private/
 Disallow: /.git/
 Disallow: /.env
