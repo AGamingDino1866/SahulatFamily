@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("university-search");
   const cityPills = document.querySelectorAll(".city-pill");
-  const cards = document.querySelectorAll(".university-card");
+  const cards = document.querySelectorAll("#university-grid .university-card");
   const emptyState = document.getElementById("university-empty");
   if (!searchInput || !cards.length) return;
 
