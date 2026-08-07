@@ -100,9 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Get main content to read
+    // Get main content to read. Elements marked data-no-read-aloud (e.g. Urdu text -
+    // the site's TTS voice doesn't support Urdu) are temporarily hidden so innerText skips them.
     const mainContent = document.querySelector('main') || document.body;
+    const skipped = Array.from(mainContent.querySelectorAll('[data-no-read-aloud]'));
+    const previousDisplay = skipped.map((el) => el.style.display);
+    skipped.forEach((el) => { el.style.display = 'none'; });
     const text = mainContent.innerText;
+    skipped.forEach((el, i) => { el.style.display = previousDisplay[i]; });
 
     if (text.trim()) {
       btn.style.background = '#d56b91';
