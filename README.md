@@ -7,7 +7,7 @@ A website where students in Pakistan apply for need-based education scholarships
 ## What this project does
 
 - **Students** sign in with Google, fill out a 16-question application (financial need, school, family background), and submit it
-- **The homepage** lists Pakistani universities and colleges, searchable and filterable by city (Karachi, Lahore, Islamabad, or Other)
+- **The homepage** lists accessible Pakistani universities and colleges (searchable and filterable by city - Karachi, Lahore, Islamabad, or Other), plus a separate list of low-cost/free primary & secondary school networks for younger students and families
 - **An AI assistant** ("Sahulat AI") answers questions about eligibility and helps students write clearer, honest answers
 - **A public status page** lets anyone look up an application's review status by ID, without needing to sign in
 - **An admin dashboard** (hidden from public navigation) lets the scholarship team review every application's full details, update its status, leave notes, and export data
