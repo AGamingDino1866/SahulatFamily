@@ -516,9 +516,8 @@ const makeId = () => `SF2026-${Math.random().toString(36).slice(2, 7).toUpperCas
 - Format: `SF2026-` + 5 random base-36 alphanumeric chars (0-9, a-z)
 - Total entropy: 36^5 = 60,466,176 possible IDs
 - Birthday problem collision: ~1 in 1,679,616 after 1000 IDs
-- **No database uniqueness constraint** (applications collection uses ID as doc ID)
-- Collision behavior: Later submission overwrites earlier one (data loss risk)
-- **Workaround:** Implement atomic counter or UUID v4 (not current)
+
+**Collision handling:** `apply.js` claims a new application ID inside a Firestore transaction (`runTransaction`) rather than writing directly - the transaction reads the candidate ID first, and only creates the document if it doesn't already exist. If it's taken, it generates a new random ID and retries (up to 5 attempts, which at these odds is effectively certain to succeed). Firestore's transaction isolation means two students colliding on the same random ID at the same moment can't both win - one transaction succeeds, the other sees the doc now exists and retries with a fresh ID. This only applies to genuinely new submissions; a student intentionally replacing their own prior application (the "Replace & Submit" flow) still writes directly to their existing ID, which is the intended overwrite.
 
 ## Migration Procedures
 
@@ -609,11 +608,10 @@ Edit `eligibility.html` directly (static content, no code changes needed):
 ## Known Limitations
 
 1. **In-memory rate limiting** - Resets on function cold start (~hourly), users can exceed 150/day
-2. **No uniqueness constraint on application IDs** - Collisions (~1/1.6M) overwrite previous submission
-3. **Firebase config in client-side JS** - API key visible in source (not a secret, scoped to Firestore rules)
-4. **Eventual consistency** - Status updates may lag behind application writes (~few seconds)
-5. **No offline support** - Requires active internet connection for Firestore operations
-6. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness
-7. **Duplicate-submission marker is per-browser, not per-account** - apply.html verifies its localStorage "already submitted" marker against Firestore on load (so a deleted application no longer falsely blocks resubmission), but a student who switches browsers/devices won't carry that marker over, since `/application_submissions` (documented above) isn't actually wired up server-side
-8. **Pre-existing applications have a plaintext CNIC** - only applications submitted after the CNIC encryption feature shipped get `cnic_encrypted`; older applications keep their original plaintext `cnic_number` field since there's no migration tool wired up to re-encrypt them
-9. **CNIC private key loss is unrecoverable** - if the `CNIC_PRIVATE_KEY` Cloudflare secret is ever lost without a backup, every previously-encrypted CNIC becomes permanently undecryptable (there's no key-rotation/re-encryption tooling in this repo)
+2. **Firebase config in client-side JS** - API key visible in source (not a secret, scoped to Firestore rules)
+3. **Eventual consistency** - Status updates may lag behind application writes (~few seconds)
+4. **No offline support** - Requires active internet connection for Firestore operations
+5. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness (and doesn't support Urdu at all - see the homepage's Urdu slogan, which is marked `data-no-read-aloud` for this reason)
+6. **Duplicate-submission marker is per-browser, not per-account** - apply.html verifies its localStorage "already submitted" marker against Firestore on load (so a deleted application no longer falsely blocks resubmission), but a student who switches browsers/devices won't carry that marker over, since `/application_submissions` (documented above) isn't actually wired up server-side
+7. **Pre-existing applications have a plaintext CNIC** - only applications submitted after the CNIC encryption feature shipped get `cnic_encrypted`; older applications keep their original plaintext `cnic_number` field since there's no migration tool wired up to re-encrypt them
+8. **CNIC private key loss is unrecoverable** - if the `CNIC_PRIVATE_KEY` Cloudflare secret is ever lost without a backup, every previously-encrypted CNIC becomes permanently undecryptable (there's no key-rotation/re-encryption tooling in this repo)
