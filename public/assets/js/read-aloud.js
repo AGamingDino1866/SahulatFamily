@@ -11,8 +11,41 @@ const stopSpeaking = () => {
 
 const isSpeaking = () => !!currentReadAloudAudio && !currentReadAloudAudio.paused;
 
+let readAloudToastTimeout = null;
+const showReadAloudError = (message) => {
+  let toast = document.getElementById('read-aloud-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'read-aloud-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      max-width: 280px;
+      background: #8b3a3a;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1.4;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      z-index: 1000;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.display = 'block';
+  clearTimeout(readAloudToastTimeout);
+  readAloudToastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 6000);
+};
+
 // Speaks text using the site's Workers AI-backed /api/tts endpoint.
 // Returns the playing Audio element (or null on failure) so callers can hook 'ended'/'error'.
+// On failure, also shows a brief visible toast - previously failures only logged to the
+// console, so read-aloud looked like it silently "did nothing" with no way to tell why.
 const speakText = async (text) => {
   stopSpeaking();
   if (!text || !text.trim()) return null;
@@ -26,7 +59,9 @@ const speakText = async (text) => {
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      console.error('TTS error:', err.error || response.status);
+      const message = err.error || `Read-aloud failed (error ${response.status}).`;
+      console.error('TTS error:', message);
+      showReadAloudError(message);
       return null;
     }
 
@@ -41,6 +76,7 @@ const speakText = async (text) => {
     return audio;
   } catch (e) {
     console.error('TTS request failed:', e);
+    showReadAloudError('Could not reach the read-aloud service. Check your connection and try again.');
     return null;
   }
 };
