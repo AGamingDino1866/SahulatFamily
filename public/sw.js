@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahulat-family-v11";
+const CACHE_NAME = "dastak-v1";
 
 const PRECACHE_URLS = [
   "/",
@@ -27,7 +27,7 @@ const PRECACHE_URLS = [
   "/assets/js/status.js",
   "/assets/js/read-aloud.js",
   "/assets/js/ui.js",
-  "/favicon.svg",
+  "/favicon.png",
   "/manifest.json",
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png"

@@ -1,10 +1,12 @@
-const applySahulatFamilyBranding = () => {
+const applyDastakBranding = () => {
   const oldEmail = "successscholarships2026@gmail.com";
   const newEmail = "sahulatfamilypk@gmail.com";
   const replacements = [
-    ["Success Factor", "Sahulat Family"],
-    ["Success Scholarship", "Sahulat Family"],
-    ["Success Club", "Sahulat Family"],
+    ["Success Factor", "Dastak"],
+    ["Success Scholarship", "Dastak"],
+    ["Success Club", "Dastak"],
+    ["Sahulat Family", "Dastak"],
+    ["Sahulat AI", "Dastak AI"],
     [oldEmail, newEmail]
   ];
 
@@ -14,10 +16,9 @@ const applySahulatFamilyBranding = () => {
     replacements.forEach(([from, to]) => {
       if (link.href.includes(from)) link.href = link.href.replaceAll(from, to);
       if (link.textContent.includes(from)) link.textContent = link.textContent.replaceAll(from, to);
+      const encodedFrom = encodeURIComponent(from);
+      if (link.href.includes(encodedFrom)) link.href = link.href.replaceAll(encodedFrom, encodeURIComponent(to));
     });
-    if (link.href.includes(encodeURIComponent("Success Factor"))) {
-      link.href = link.href.replaceAll(encodeURIComponent("Success Factor"), encodeURIComponent("Sahulat Family"));
-    }
   });
 
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -44,7 +45,7 @@ const injectNavyTheme = () => {
     html{background:#ffffff!important}body,.centered-header,.site-header,.auth-box,.result-grid div,.receipt-note,.note-band:not(.force-navy){background:#ffffff!important;color:#2c2c85!important}
     .soft-band{background:#ffffff!important;color:#2c2c85!important}
     .button.primary,.button:not(.secondary):not(.light),.nav-links a:hover,.scholarship-card.featured,.cta-panel,.note-band,.step span,.google-dot,.chat-row.user .bubble{background:#2c2c85!important;color:#ffffff!important}
-    .brand-mark{display:block!important;overflow:hidden!important;border-radius:50%!important;background:#ffffff url("favicon.svg") center/cover no-repeat!important;color:transparent!important;text-indent:-999px!important;box-shadow:0 10px 24px rgba(44,44,133,.16)!important}
+    .brand-mark{display:block!important;overflow:hidden!important;border-radius:50%!important;background:#ffffff url("favicon.png") center/cover no-repeat!important;color:transparent!important;text-indent:-999px!important;box-shadow:0 10px 24px rgba(44,44,133,.16)!important}
     .button.secondary,.button.light,.google-button,.account-actions .button,.limit-pill,input,select,textarea,.surface-card,.feature-card,.university-card,.portal-card,.scholarship-card,.ai-panel,.tip-card,.lookup-card,.result-card,.contact-card,.auth-panel,.auth-card,.admin-panel,.criteria-card,.docs-card,.income-card{background:#ffffff!important;color:#2c2c85!important;border-color:rgba(44,44,133,.16)!important}
     .hero-card,.auth-hero,.contact-hero,.status-hero,.eligibility-hero,.ai-banner{background:linear-gradient(135deg,rgba(44,44,133,.92),rgba(44,44,133,.62)),image-set(url("assets/img/education-hero.webp") type("image/webp"),url("assets/img/education-hero.png")) center/cover!important;color:#ffffff!important}
     .hero-card p,.auth-hero p,.contact-hero p,.status-hero p,.eligibility-hero p,.ai-banner p,.scholarship-card.featured p,.scholarship-card.featured li,.cta-panel p,.note-band p{color:rgba(255,255,255,.86)!important}
@@ -187,7 +188,7 @@ const setupNavigation = () => {
 };
 
 setupNavigation();
-applySahulatFamilyBranding();
+applyDastakBranding();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

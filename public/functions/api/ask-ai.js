@@ -42,7 +42,7 @@ const reserveIpMessage = (request) => {
   return true;
 };
 
-const siteContext = `Sahulat Family scholarship website context:
+const siteContext = `Dastak scholarship website context:
 - Purpose: help students who need financial support continue their education.
 - Audience: students and families preparing scholarship applications in Pakistan.
 - Home page: explains the program and links to Pakistani university admissions pages.
@@ -52,9 +52,9 @@ const siteContext = `Sahulat Family scholarship website context:
 - Status page: students check updates with their application ID.
 - Contact page: official help email is sahulatfamilypk@gmail.com.
 - Admin page: hidden page for the scholarship team to review applications and update statuses.
-- Sahulat AI cannot see submitted applications, cannot check live status, cannot approve or reject students, and cannot change admin records.`;
+- Dastak AI cannot see submitted applications, cannot check live status, cannot approve or reject students, and cannot change admin records.`;
 
-const systemPrompt = `You are Sahulat AI for the Sahulat Family scholarship portal.
+const systemPrompt = `You are Dastak AI for the Dastak scholarship portal.
 Use only the website context below, the recent conversation, and the student's latest question.
 ${siteContext}
 
@@ -64,7 +64,7 @@ Conversation memory rules:
 - If the student asks to continue or revise something, use the most relevant previous message from the recent chat.
 
 Scope rules:
-- Answer only questions related to Sahulat Family, scholarship applications, education goals, financial-need wording, application preparation, status wording, documents, contacting the program, or using this website.
+- Answer only questions related to Dastak, scholarship applications, education goals, financial-need wording, application preparation, status wording, documents, contacting the program, or using this website.
 - If a question is unrelated, politely refuse in one short sentence and redirect the student to ask about the scholarship application or website.
 - Do not give unrelated study tips, random facts, general life advice, entertainment, coding help, medical/legal/financial advice, or anything outside this portal.
 - Do not promise approval, invent official decisions, claim to check live records, or ask for passwords, ID numbers, bank details, or sensitive documents.
@@ -101,15 +101,15 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   if (!env.GROQ_API_KEY) {
-    return json({ ok: false, error: "Sahulat AI is not configured yet. Add GROQ_API_KEY in Cloudflare Pages environment variables." }, 500);
+    return json({ ok: false, error: "Dastak AI is not configured yet. Add GROQ_API_KEY in Cloudflare Pages environment variables." }, 500);
   }
 
   if (!request.headers.get("x-firebase-token")) {
-    return json({ ok: false, error: "Please sign in with Google before using Sahulat AI." }, 401);
+    return json({ ok: false, error: "Please sign in with Google before using Dastak AI." }, 401);
   }
 
   if (!reserveIpMessage(request)) {
-    return json({ ok: false, error: "Too many Sahulat AI messages from this network today. Please try again tomorrow." }, 429);
+    return json({ ok: false, error: "Too many Dastak AI messages from this network today. Please try again tomorrow." }, 429);
   }
 
   let body;
@@ -149,7 +149,7 @@ export async function onRequestPost(context) {
   }
 
   const answer = payload.choices?.[0]?.message?.content?.trim();
-  if (!answer) return json({ ok: false, error: "Sahulat AI returned an empty answer." }, 502);
+  if (!answer) return json({ ok: false, error: "Dastak AI returned an empty answer." }, 502);
 
   return json({ ok: true, answer });
 }

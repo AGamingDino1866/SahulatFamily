@@ -1,4 +1,4 @@
-# Success Factor - Implementation Reference
+# Dastak - Implementation Reference
 
 Cloudflare Pages static site + Firestore + Firebase Auth + Groq LLM.
 
@@ -240,7 +240,7 @@ const unlimitedAiEmail = "sahulatfamilypk@gmail.com";
 const key = `${todayKey()}:${getClientIp(request)}`;
 const current = ipUsage.get(key) || 0;
 if (current >= IP_DAILY_LIMIT && !hasUnlimitedAi(request)) {
-  return json({ ok: false, error: "Too many Sahulat AI messages..." }, 429);
+  return json({ ok: false, error: "Too many Dastak AI messages..." }, 429);
 }
 ipUsage.set(key, current + 1);
 ```
@@ -369,11 +369,11 @@ x-firebase-token: <JWT from Firebase Auth>   (required - verified server-side, n
 **Files:**
 - `manifest.json` (project root) - name, icons, `theme_color: #2c2c85`, `display: standalone`, `start_url: /index.html`
 - `sw.js` (project root) - service worker; precaches the app shell (main HTML pages, `styles.css`, `script.js`, `read-aloud.js`, `ui.js`, icons) on install, network-first for page navigations with cache fallback (so offline visits still load something), cache-first for static assets, bumps `CACHE_NAME` to invalidate old caches
-- `assets/icons/` - `icon-192.png`, `icon-512.png` (any + maskable purposes), `apple-touch-icon.png` (180x180), generated from `favicon.svg` with white padding for the maskable safe zone
+- `assets/icons/` - `icon-192.png`, `icon-512.png` (any + maskable purposes), `apple-touch-icon.png` (180x180), plus `favicon.png` at the project root - all cropped/resized from `assets/img/dastak-brand.jpg` (the Dastak logo photo, already a full-bleed square so no extra padding is added for the maskable safe zone)
 - Registered from `assets/js/script.js` on `window load`, guarded by `"serviceWorker" in navigator`
 - `<link rel="manifest">`, `<meta name="theme-color">`, and `<link rel="apple-touch-icon">` are on every page's `<head>`, right after the favicon link
 
-**Updating the icon:** regenerate from `favicon.svg` with ImageMagick, e.g. `convert -background white -density 400 favicon.svg -resize 380x380 -gravity center -extent 512x512 -background white -alpha remove -alpha off assets/icons/icon-512.png` (adjust the `-resize`/`-extent` pair per target size, keeping ~25% padding for the maskable safe zone).
+**Updating the icon:** regenerate from `assets/img/dastak-brand.jpg` with ImageMagick, e.g. `convert assets/img/dastak-brand.jpg -resize 512x512^ -gravity center -extent 512x512 assets/icons/icon-512.png` (adjust the `-resize`/`-extent` pair per target size). If the logo photo itself ever changes, regenerate `favicon.png`, `icon-192.png`, `icon-512.png`, and `apple-touch-icon.png` from the new source and bump `sw.js`'s `CACHE_NAME`.
 
 **Updating cached files:** bump `CACHE_NAME` in `sw.js` (e.g. `sahulat-family-v2`) whenever `PRECACHE_URLS` changes or a precached file's content changes meaningfully - the old cache is deleted on activate.
 
@@ -611,7 +611,7 @@ Edit `eligibility.html` directly (static content, no code changes needed):
 2. **Firebase config in client-side JS** - API key visible in source (not a secret, scoped to Firestore rules)
 3. **Eventual consistency** - Status updates may lag behind application writes (~few seconds)
 4. **No offline support** - Requires active internet connection for Firestore operations
-5. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness (and doesn't support Urdu at all - see the homepage's Urdu slogan, which is marked `data-no-read-aloud` for this reason)
+5. **`/api/tts` voice quality is capped by MeloTTS** - Workers AI's `@cf/myshell-ai/melotts` is a lighter open-source model with no per-voice selection beyond `lang`; it won't match a dedicated cloud TTS provider's naturalness and doesn't support Urdu at all. The `data-no-read-aloud` attribute (read-aloud.js temporarily hides matching elements before building the "read whole page" text) exists for exactly this - use it again on any future Urdu-script content, the way it was used on an earlier version of the homepage's tagline before the tagline was changed to the Roman-script "Har Dastaq, Ek Ummed" (which the English voice will mispronounce but at least won't skip/error on)
 6. **Duplicate-submission marker is per-browser, not per-account** - apply.html verifies its localStorage "already submitted" marker against Firestore on load (so a deleted application no longer falsely blocks resubmission), but a student who switches browsers/devices won't carry that marker over, since `/application_submissions` (documented above) isn't actually wired up server-side
 7. **Pre-existing applications have a plaintext CNIC** - only applications submitted after the CNIC encryption feature shipped get `cnic_encrypted`; older applications keep their original plaintext `cnic_number` field since there's no migration tool wired up to re-encrypt them
 8. **CNIC private key loss is unrecoverable** - if the `CNIC_PRIVATE_KEY` Cloudflare secret is ever lost without a backup, every previously-encrypted CNIC becomes permanently undecryptable (there's no key-rotation/re-encryption tooling in this repo)

@@ -26,7 +26,7 @@ import { firebaseConfig } from "./firebase-config.js";
       const unlimitedAiEmail = 'sahulatfamilypk@gmail.com';
       const hasUnlimitedAi = (user) => String(user?.email || '').trim().toLowerCase() === unlimitedAiEmail;
 
-      const welcomeMessage = 'Hi, I am Sahulat AI. Ask me a question about your form.';
+      const welcomeMessage = 'Hi, I am Dastak AI. Ask me a question about your form.';
       const storageKey = 'successFactorAiChats:v1';
       const todayKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi' }).format(new Date());
       const usageDoc = (user) => doc(db, 'ai_usage', `${user.uid}_${todayKey()}`);

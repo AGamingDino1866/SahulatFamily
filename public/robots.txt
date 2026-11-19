@@ -1,4 +1,4 @@
-# Sahulat Family Scholarship Portal - Search Engine Robots Configuration
+# Dastak Scholarship Portal - Search Engine Robots Configuration
 
 User-agent: *
 Allow: /

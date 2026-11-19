@@ -1,4 +1,4 @@
-# Sahulat Family Scholarship Portal
+# Dastak Scholarship Portal
 
 A website where students in Pakistan apply for need-based education scholarships, check their application status, and get AI-assisted help writing their application - and where the scholarship team reviews and manages every submission.
 
@@ -8,7 +8,7 @@ A website where students in Pakistan apply for need-based education scholarships
 
 - **Students** sign in with Google, fill out a 16-question application (financial need, school, family background), and submit it
 - **The homepage** lists accessible Pakistani universities and colleges (searchable and filterable by city - Karachi, Lahore, Islamabad, or Other), plus a separate list of low-cost/free primary & secondary school networks for younger students and families
-- **An AI assistant** ("Sahulat AI") answers questions about eligibility and helps students write clearer, honest answers
+- **An AI assistant** ("Dastak AI") answers questions about eligibility and helps students write clearer, honest answers
 - **A public status page** lets anyone look up an application's review status by ID, without needing to sign in
 - **An admin dashboard** (hidden from public navigation) lets the scholarship team review every application's full details, update its status, leave notes, and export data
 - **Every page** has a floating read-aloud button and per-question read-aloud in the application form, for students with limited literacy or vision
@@ -65,12 +65,12 @@ public/
 ├── sitemap.xml             # Search engine sitemap
 ├── _routes.json            # CF Pages Functions routing config (routes /api/* only)
 ├── _headers                # Cache-Control: no-cache on every path, so deploys are always picked up without a hard refresh
-├── favicon.svg
+├── favicon.png              # Dastak brand mark, cropped/resized from assets/img/dastak-brand.jpg
 ├── assets/
 │   ├── css/
 │   │   ├── styles.css      # Shared theme: CSS custom properties (colors, shadows), base layout
 │   │   └── {page}.css      # One file per page (apply.css, index.css, admin.css, ...) - page-specific layout only
-│   ├── img/                # Hero images (education-hero.png/webp)
+│   ├── img/                # Hero images (education-hero.png/webp), dastak-brand.jpg/webp (logo source)
 │   ├── icons/              # PWA icons (192/512 + apple-touch-icon), generated from favicon.svg
 │   ├── js/
 │   │   ├── script.js       # Shared: nav setup, mobile menu, navy theme injection, SW registration - loaded on every page
